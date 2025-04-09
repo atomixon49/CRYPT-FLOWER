@@ -15,6 +15,7 @@ from typing import Dict, Any, List, Optional
 from ..core.key_management import KeyManager
 from ..core.encryption import EncryptionEngine
 from ..core.signatures import SignatureEngine
+from ..core.cert_revocation import CertificateRevocationChecker
 from ..file_handlers.text_handler import TextFileHandler
 from ..file_handlers.pdf_handler import PDFHandler
 from ..file_handlers.pdf_section_handler import PDFSectionHandler
@@ -34,6 +35,7 @@ class CLI:
         self.key_manager = None
         self.encryption_engine = EncryptionEngine()
         self.signature_engine = SignatureEngine()
+        self.revocation_checker = None
         self.text_handler = None
         self.pdf_handler = None
         self.pdf_section_handler = None
@@ -207,6 +209,22 @@ Examples:
         verify_cert_parser.add_argument('--trusted', '-t', nargs='+', required=True,
                                      help='Trusted certificate IDs')
 
+        # Check certificate revocation
+        check_revocation_parser = cert_subparsers.add_parser('check-revocation',
+                                                         help='Check if a certificate is revoked')
+        check_revocation_parser.add_argument('--cert', '-c', required=True,
+                                         help='Certificate file to check')
+        check_revocation_parser.add_argument('--issuer', '-i', required=True,
+                                         help='Issuer certificate file')
+        check_revocation_parser.add_argument('--crl', '-l',
+                                         help='CRL file (optional)')
+        check_revocation_parser.add_argument('--ocsp', '-o',
+                                         help='OCSP responder URL (optional)')
+        check_revocation_parser.add_argument('--method', '-m',
+                                         choices=['both', 'crl', 'ocsp'],
+                                         default='both',
+                                         help='Revocation check method')
+
         # List keys command
         list_keys_parser = subparsers.add_parser('list-keys', help='List stored keys')
 
@@ -347,6 +365,10 @@ Examples:
         self.pdf_handler = PDFHandler(self.key_manager, self.encryption_engine)
         self.pdf_section_handler = PDFSectionHandler(self.key_manager, self.encryption_engine)
         self.directory_handler = DirectoryHandler(self.key_manager, self.encryption_engine)
+
+        # Initialize certificate revocation checker
+        cache_dir = os.path.join(os.path.expanduser("~"), ".secure_crypto", "crl_cache")
+        self.revocation_checker = CertificateRevocationChecker(cache_dir=cache_dir)
 
         self.storage_initialized = True
         return True
@@ -1022,6 +1044,8 @@ Examples:
             return self.handle_cert_import(args)
         elif args.cert_command == 'verify':
             return self.handle_cert_verify(args)
+        elif args.cert_command == 'check-revocation':
+            return self.handle_cert_check_revocation(args)
         else:
             print(f"Error: Unknown certificate command: {args.cert_command}")
             return 1
@@ -1220,6 +1244,150 @@ Examples:
             return 0 if result['valid'] else 1
         except Exception as e:
             print(f"Error verifying certificate: {str(e)}")
+            return 1
+
+    def handle_cert_check_revocation(self, args: argparse.Namespace) -> int:
+        """
+        Handle the cert check-revocation command.
+
+        Args:
+            args: Parsed arguments
+
+        Returns:
+            Exit code (0 for success, non-zero for error)
+        """
+        try:
+            # Read the certificate file
+            with open(args.cert, 'rb') as f:
+                cert_data = f.read()
+
+            # Read the issuer certificate file
+            with open(args.issuer, 'rb') as f:
+                issuer_data = f.read()
+
+            # Read the CRL file if provided
+            crl_data = None
+            if args.crl:
+                with open(args.crl, 'rb') as f:
+                    crl_data = f.read()
+
+            # Initialize the revocation checker if not already initialized
+            if not self.revocation_checker:
+                cache_dir = os.path.join(os.path.expanduser("~"), ".secure_crypto", "crl_cache")
+                self.revocation_checker = CertificateRevocationChecker(cache_dir=cache_dir)
+
+            # Check revocation based on the method
+            if args.method == 'crl' or args.method == 'both':
+                if crl_data:
+                    # Check against the provided CRL
+                    result = self.revocation_checker.check_certificate_against_crl(
+                        certificate=cert_data,
+                        crl_data=crl_data,
+                        issuer_certificate=issuer_data
+                    )
+
+                    print("\nCRL Check Result:")
+                    print(f"Status: {result['status']}")
+                    if result['status'] == 'revoked':
+                        print(f"Revoked: {result['revoked']}")
+                        if 'reason' in result and result['reason']:
+                            print(f"Reason: {result['reason']}")
+                        if 'revocation_time_str' in result:
+                            print(f"Revocation Time: {result['revocation_time_str']}")
+                    elif result['status'] == 'good':
+                        print(f"Revoked: {result['revoked']}")
+                        if 'crl_last_update_str' in result:
+                            print(f"CRL Last Update: {result['crl_last_update_str']}")
+                        if 'crl_next_update_str' in result and result['crl_next_update_str']:
+                            print(f"CRL Next Update: {result['crl_next_update_str']}")
+                else:
+                    # Check against CRLs from the certificate
+                    results = self.revocation_checker.check_certificate_crl(
+                        certificate=cert_data,
+                        issuer_certificate=issuer_data
+                    )
+
+                    print("\nCRL Check Results:")
+                    for i, result in enumerate(results):
+                        print(f"\nResult {i+1}:")
+                        print(f"Status: {result['status']}")
+                        if 'crl_url' in result:
+                            print(f"CRL URL: {result['crl_url']}")
+
+                        if result['status'] == 'revoked':
+                            print(f"Revoked: {result['revoked']}")
+                            if 'reason' in result and result['reason']:
+                                print(f"Reason: {result['reason']}")
+                            if 'revocation_time_str' in result:
+                                print(f"Revocation Time: {result['revocation_time_str']}")
+                        elif result['status'] == 'good':
+                            print(f"Revoked: {result['revoked']}")
+                            if 'crl_last_update_str' in result:
+                                print(f"CRL Last Update: {result['crl_last_update_str']}")
+                            if 'crl_next_update_str' in result and result['crl_next_update_str']:
+                                print(f"CRL Next Update: {result['crl_next_update_str']}")
+                        elif result['status'] == 'error':
+                            print(f"Error: {result.get('error', 'Unknown error')}")
+
+            if args.method == 'ocsp' or args.method == 'both':
+                if args.ocsp:
+                    # Check against the provided OCSP responder
+                    result = self.revocation_checker.check_certificate_with_ocsp(
+                        certificate=cert_data,
+                        issuer_certificate=issuer_data,
+                        ocsp_url=args.ocsp
+                    )
+
+                    print("\nOCSP Check Result:")
+                    print(f"Status: {result['status']}")
+                    print(f"OCSP URL: {result['ocsp_url']}")
+
+                    if result['status'] == 'revoked':
+                        print(f"Revoked: {result['revoked']}")
+                        if 'reason' in result and result['reason']:
+                            print(f"Reason: {result['reason']}")
+                        if 'revocation_time_str' in result:
+                            print(f"Revocation Time: {result['revocation_time_str']}")
+                    elif result['status'] == 'good':
+                        print(f"Revoked: {result['revoked']}")
+                        if 'this_update_str' in result:
+                            print(f"This Update: {result['this_update_str']}")
+                        if 'next_update_str' in result and result['next_update_str']:
+                            print(f"Next Update: {result['next_update_str']}")
+                    elif result['status'] == 'error':
+                        print(f"Error: {result.get('error', 'Unknown error')}")
+                else:
+                    # Check against OCSP responders from the certificate
+                    results = self.revocation_checker.check_certificate_ocsp(
+                        certificate=cert_data,
+                        issuer_certificate=issuer_data
+                    )
+
+                    print("\nOCSP Check Results:")
+                    for i, result in enumerate(results):
+                        print(f"\nResult {i+1}:")
+                        print(f"Status: {result['status']}")
+                        if 'ocsp_url' in result:
+                            print(f"OCSP URL: {result['ocsp_url']}")
+
+                        if result['status'] == 'revoked':
+                            print(f"Revoked: {result['revoked']}")
+                            if 'reason' in result and result['reason']:
+                                print(f"Reason: {result['reason']}")
+                            if 'revocation_time_str' in result:
+                                print(f"Revocation Time: {result['revocation_time_str']}")
+                        elif result['status'] == 'good':
+                            print(f"Revoked: {result['revoked']}")
+                            if 'this_update_str' in result:
+                                print(f"This Update: {result['this_update_str']}")
+                            if 'next_update_str' in result and result['next_update_str']:
+                                print(f"Next Update: {result['next_update_str']}")
+                        elif result['status'] == 'error':
+                            print(f"Error: {result.get('error', 'Unknown error')}")
+
+            return 0
+        except Exception as e:
+            print(f"Error checking certificate revocation: {str(e)}")
             return 1
 
 
