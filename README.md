@@ -48,57 +48,221 @@ pip install -r requirements.txt
 
 ## Uso
 
+### Encriptación y Desencriptación
+
+```python
+from src_crypto.encryption import EncryptionEngine
+from src_crypto.key_management import KeyManager
+
+# Inicializar componentes
+key_manager = KeyManager()
+encryption_engine = EncryptionEngine(key_manager)
+
+# Generar una clave
+key = key_manager.generate_key(algorithm='AES')
+
+# Encriptar datos
+data = b'Información confidencial'
+encryption_result = encryption_engine.encrypt(data, key, algorithm='AES-GCM')
+
+# Desencriptar datos
+decrypted_data = encryption_engine.decrypt(encryption_result, key)
+print(decrypted_data.decode('utf-8'))  # Información confidencial
+```
+
+### Firmas Digitales
+
+```python
+from src_crypto.signatures import SignatureEngine
+
+# Inicializar el motor de firmas
+signature_engine = SignatureEngine(key_manager)
+
+# Generar un par de claves para firmas
+private_key, public_key = key_manager.generate_keypair(algorithm='RSA')
+
+# Firmar datos
+data = b'Documento a firmar'
+signature = signature_engine.sign(data, private_key, algorithm='RSA-PSS')
+
+# Verificar firma
+is_valid = signature_engine.verify(data, signature, public_key, algorithm='RSA-PSS')
+print(f'Firma válida: {is_valid}')  # Firma válida: True
+```
+
+### Criptografía Post-Cuántica
+
+```python
+from src_core.post_quantum import PostQuantumCrypto
+
+# Inicializar el módulo post-cuántico
+pq_crypto = PostQuantumCrypto()
+
+# Generar un par de claves para algoritmo Kyber
+public_key, private_key = pq_crypto.generate_keypair(algorithm='KYBER768')
+
+# Encapsular una clave compartida
+ciphertext, shared_secret = pq_crypto.encapsulate(public_key, algorithm='KYBER768')
+
+# Decapsular la clave compartida
+decapsulated_secret = pq_crypto.decapsulate(ciphertext, private_key, algorithm='KYBER768')
+
+# Verificar que ambas claves son iguales
+print(shared_secret == decapsulated_secret)  # True
+```
+
+### Manejo de Archivos
+
+```python
+from src_crypto.key_management import KeyManager
+from src_crypto.encryption import EncryptionEngine
+from src_file_handlers.text_handler import TextFileHandler
+
+# Inicializar componentes
+key_manager = KeyManager()
+encryption_engine = EncryptionEngine(key_manager)
+text_handler = TextFileHandler(key_manager, encryption_engine)
+
+# Encriptar un archivo de texto
+key = key_manager.generate_key(algorithm='AES')
+result = text_handler.encrypt_file(
+    input_path='documento.txt',
+    output_path='documento.encrypted',
+    key=key,
+    algorithm='AES-GCM'
+)
+
+# Desencriptar un archivo
+text_handler.decrypt_file(
+    input_path='documento.encrypted',
+    output_path='documento_desencriptado.txt',
+    key=key
+)
+```
+
 ### Interfaz de Línea de Comandos
 
 ```bash
 # Cifrar un archivo
-python -m src.main encrypt --file documento.txt --output documento.encrypted --algorithm AES-GCM
+python -m src_main.main encrypt --file documento.txt --output documento.encrypted --algorithm AES-GCM
 
 # Descifrar un archivo
-python -m src.main decrypt --file documento.encrypted --output documento.decrypted
+python -m src_main.main decrypt --file documento.encrypted --output documento.decrypted
 
 # Firmar un archivo
-python -m src.main sign --file documento.txt --output documento.sig
+python -m src_main.main sign --file documento.txt --output documento.sig
 
 # Verificar una firma
-python -m src.main verify --file documento.txt --signature documento.sig
+python -m src_main.main verify --file documento.txt --signature documento.sig
 ```
 
 ### Interfaz Gráfica
 
 ```bash
 # Iniciar la interfaz gráfica
-python -m src.main --gui
+python -m src_main.main --gui
 ```
 
 ## Estructura del Proyecto
 
-```
-src/
-├── api/                   # API REST y endpoints
-├── core/                  # Funcionalidad criptográfica principal
-│   ├── encryption/        # Algoritmos de encriptación
-│   ├── signatures/        # Algoritmos de firma digital
-│   ├── key_management/    # Gestión de claves
-│   ├── post_quantum/      # Criptografía post-cuántica
-│   ├── hsm/               # Soporte para HSM/TPM
-│   ├── audit/             # Auditoría y logging
-│   └── benchmark/         # Benchmarking y rendimiento
-├── file_handlers/         # Manejadores de archivos
-├── plugins/               # Plugins para sistemas externos
-├── ui/                    # Interfaces de usuario
-│   ├── cli/               # Interfaz de línea de comandos
-│   └── gui/               # Interfaz gráfica
-└── utils/                 # Utilidades generales
+El proyecto CRYPT-FLOWER ha sido reorganizado para mejorar la claridad y mantenibilidad del código. La nueva estructura es la siguiente:
 
-tests/                     # Pruebas
-├── unit/                  # Pruebas unitarias
-├── integration/           # Pruebas de integración
-└── security/              # Pruebas de seguridad
-
-docs/                      # Documentación
-scripts/                   # Scripts de utilidad
 ```
+src_main/                  # Punto de entrada principal de la aplicación
+├── __init__.py           # Inicialización del módulo
+└── main.py               # Archivo principal de ejecución
+
+src_core/                  # Componentes principales del núcleo criptográfico
+├── cert_revocation.py    # Verificación de revocación de certificados
+├── cosign.py             # Funcionalidad de co-firma
+├── hsm_key_manager.py    # Gestión de claves en HSM
+├── multi_recipient_encryption.py # Encriptación para múltiples destinatarios
+├── post_quantum.py       # Soporte básico para criptografía post-cuántica
+└── timestamp.py          # Sellado de tiempo
+
+src_crypto/                # Algoritmos y motores de encriptación
+├── encryption.py         # Motor principal de encriptación
+├── signatures.py         # Motor de firmas digitales
+├── key_management.py     # Gestión de claves criptográficas
+├── hybrid_crypto.py      # Criptografía híbrida (clásica + post-cuántica)
+├── crypto_audit.py       # Auditoría de operaciones criptográficas
+├── crypto_benchmark.py   # Benchmarking de algoritmos criptográficos
+├── jwt_interface.py      # Interfaz para tokens JWT
+├── key_rotation.py       # Rotación automática de claves
+├── key_storage.py        # Almacenamiento seguro de claves
+├── pkcs11_interface.py   # Interfaz para PKCS#11 (HSM)
+├── post_quantum.py       # Implementación avanzada de algoritmos post-cuánticos
+└── x509_certificates.py  # Manejo de certificados X.509
+
+src_file_handlers/         # Manejadores de archivos
+├── text_handler.py       # Encriptación/desencriptación de archivos de texto
+├── pdf_handler.py        # Encriptación/desencriptación de archivos PDF
+├── pdf_section_handler.py # Encriptación de secciones específicas de PDF
+└── directory_handler.py  # Procesamiento de directorios completos
+
+src_ui/                    # Interfaces de usuario
+├── cli/                  # Interfaz de línea de comandos
+│   ├── __main__.py        # Punto de entrada para CLI
+│   ├── cert_revocation_commands.py # Comandos para revocación de certificados
+│   ├── cosign_commands.py  # Comandos para co-firma
+│   ├── multi_recipient_commands.py # Comandos para encriptación multi-destinatario
+│   └── timestamp_commands.py # Comandos para sellado de tiempo
+├── gui/                  # Interfaz gráfica de usuario
+│   ├── main_window.py     # Ventana principal de la aplicación
+│   ├── run.py             # Inicialización de la GUI
+│   └── tabs/              # Pestañas de la interfaz gráfica
+│       ├── encryption_tab.py # Pestaña de encriptación
+│       ├── signatures_tab.py # Pestaña de firmas
+│       ├── key_management_tab.py # Pestaña de gestión de claves
+│       ├── audit_tab.py      # Pestaña de auditoría
+│       ├── benchmark_tab.py  # Pestaña de benchmarking
+│       ├── cert_revocation_tab.py # Pestaña de revocación de certificados
+│       ├── cosign_tab.py     # Pestaña de co-firma
+│       ├── directory_tab.py  # Pestaña de procesamiento de directorios
+│       ├── jwt_tab.py        # Pestaña de tokens JWT
+│       ├── key_rotation_tab.py # Pestaña de rotación de claves
+│       ├── multi_recipient_tab.py # Pestaña de encriptación multi-destinatario
+│       └── pdf_section_tab.py # Pestaña de secciones PDF
+└── cli_pdf_sections.py   # CLI para secciones PDF
+
+src_security/              # Pruebas y herramientas de seguridad
+├── fuzzing/              # Pruebas de fuzzing
+│   ├── fuzz_generator.py  # Generador de datos para fuzzing
+│   ├── fuzz_result.py     # Resultados de pruebas de fuzzing
+│   └── fuzzing_engine.py  # Motor de fuzzing
+├── penetration_tests/    # Pruebas de penetración
+│   ├── crypto_attack_simulator.py # Simulador de ataques criptográficos
+│   ├── penetration_tester.py # Tester de penetración general
+│   └── ui_security_tester.py # Tester de seguridad de UI
+├── static_analysis/      # Análisis estático de código
+│   ├── analyzer.py        # Analizador de código
+│   ├── report.py          # Generador de informes
+│   └── rules.py           # Reglas de análisis
+├── run_all_tests.py      # Ejecuta todas las pruebas de seguridad
+├── run_api_security_tests.py # Pruebas de seguridad para API
+├── run_gui_security_tests.py # Pruebas de seguridad para GUI
+└── run_security_tests.py # Pruebas de seguridad generales
+```
+
+### Descripción de los Componentes Principales
+
+#### src_main
+Contiene el punto de entrada principal de la aplicación. Desde aquí se inicializa y coordina el resto de los componentes.
+
+#### src_core
+Contiene los componentes fundamentales del núcleo criptográfico, como la verificación de revocación de certificados, co-firma, gestión de claves en HSM, encriptación para múltiples destinatarios, soporte para criptografía post-cuántica y sellado de tiempo.
+
+#### src_crypto
+Implementa los algoritmos y motores de encriptación, incluyendo el motor principal de encriptación, firmas digitales, gestión de claves, criptografía híbrida, auditoría, benchmarking, interfaz JWT, rotación de claves, almacenamiento seguro, interfaz PKCS#11 para HSM, algoritmos post-cuánticos avanzados y manejo de certificados X.509.
+
+#### src_file_handlers
+Proporciona manejadores para diferentes tipos de archivos, como texto plano, PDF (completo o por secciones) y directorios completos.
+
+#### src_ui
+Implementa las interfaces de usuario, tanto la interfaz de línea de comandos (CLI) como la interfaz gráfica (GUI). La GUI está organizada en pestañas para facilitar el acceso a las diferentes funcionalidades.
+
+#### src_security
+Contiene herramientas y pruebas de seguridad, incluyendo fuzzing, pruebas de penetración y análisis estático de código.
 
 ## Pruebas
 
