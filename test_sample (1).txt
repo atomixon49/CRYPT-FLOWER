@@ -1,7 +1,0 @@
-Este es un archivo de texto de prueba para el sistema criptográfico.
-Contiene múltiples líneas de texto para verificar que la encriptación y desencriptación
-funcionen correctamente con diferentes tipos de contenido.
-
-1234567890
-!@#$%^&*()_+
-áéíóúñÁÉÍÓÚÑ
