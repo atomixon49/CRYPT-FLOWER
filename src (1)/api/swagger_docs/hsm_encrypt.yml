@@ -1,0 +1,91 @@
+Encrypt with HSM Key:
+  tags:
+    - HSM
+  summary: Encrypt data using an HSM key
+  description: Encrypt data using a key stored on the Hardware Security Module (HSM)
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data
+            - key_id
+          properties:
+            data:
+              type: string
+              format: byte
+              description: Base64-encoded data to encrypt
+              example: SGVsbG8gV29ybGQh
+            key_id:
+              type: string
+              description: ID of the key to use
+              example: my_hsm_key
+            algorithm:
+              type: string
+              description: Encryption algorithm to use
+              enum: [AES-CBC, AES-GCM, RSA-OAEP]
+              default: AES-GCM
+              example: AES-GCM
+            params:
+              type: object
+              description: Additional parameters for the algorithm
+              properties:
+                iv:
+                  type: string
+                  format: byte
+                  description: Base64-encoded initialization vector (if not provided, a random one will be generated)
+                aad:
+                  type: string
+                  format: byte
+                  description: Base64-encoded additional authenticated data (for AES-GCM)
+  responses:
+    200:
+      description: Data encrypted successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              algorithm:
+                type: string
+                description: Encryption algorithm used
+              ciphertext:
+                type: string
+                format: byte
+                description: Base64-encoded encrypted data
+              iv:
+                type: string
+                format: byte
+                description: Base64-encoded initialization vector (if applicable)
+              tag:
+                type: string
+                format: byte
+                description: Base64-encoded authentication tag (if applicable)
+    400:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404:
+      description: Key not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  security:
+    - Bearer: []

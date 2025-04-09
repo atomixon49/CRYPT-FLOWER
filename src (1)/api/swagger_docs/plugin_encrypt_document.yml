@@ -1,0 +1,106 @@
+Encrypt Document with Plugin:
+  tags:
+    - Plugins
+  summary: Encrypt a document using a plugin
+  description: Encrypt a document in a document management system using a plugin
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - plugin_id
+            - document_id
+            - key_id
+          properties:
+            plugin_id:
+              type: string
+              description: ID of the plugin to use
+              example: sharepoint
+            document_id:
+              type: string
+              description: ID or path of the document to encrypt
+              example: /documents/confidential.docx
+            key_id:
+              type: string
+              description: ID of the key to use for encryption
+              example: my_key
+            algorithm:
+              type: string
+              description: Encryption algorithm to use
+              enum: [AES-GCM, AES-CBC, ChaCha20-Poly1305]
+              default: AES-GCM
+              example: AES-GCM
+            metadata:
+              type: object
+              description: Additional metadata to store with the encrypted document
+              example:
+                classification: confidential
+                department: finance
+            connection_params:
+              type: object
+              description: Connection parameters for the document management system (if not using stored configuration)
+              properties:
+                url:
+                  type: string
+                  description: URL of the document management system
+                username:
+                  type: string
+                  description: Username for authentication
+                password:
+                  type: string
+                  description: Password for authentication
+                token:
+                  type: string
+                  description: Authentication token
+  responses:
+    200:
+      description: Document encrypted successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              document_id:
+                type: string
+                description: ID or path of the encrypted document
+              algorithm:
+                type: string
+                description: Encryption algorithm used
+              key_id:
+                type: string
+                description: ID of the key used for encryption
+              timestamp:
+                type: string
+                format: date-time
+                description: Timestamp of the encryption operation
+              metadata:
+                type: object
+                description: Metadata stored with the encrypted document
+    400:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404:
+      description: Plugin or document not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  security:
+    - Bearer: []

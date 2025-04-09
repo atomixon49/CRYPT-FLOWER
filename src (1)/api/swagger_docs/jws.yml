@@ -1,0 +1,64 @@
+Create JWS:
+  tags:
+    - JWT
+  summary: Create a JWS token
+  description: Create a JSON Web Signature (JWS) token
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: object
+        required:
+          - payload
+          - key_id
+        properties:
+          payload:
+            type: object
+            description: Data to sign
+          key_id:
+            type: string
+            description: ID of the key to use for signing
+          algorithm:
+            type: string
+            description: Signature algorithm to use
+            default: RS256
+            enum:
+              - RS256
+              - RS384
+              - RS512
+              - PS256
+              - PS384
+              - PS512
+              - ES256
+              - ES384
+              - ES512
+              - HS256
+              - HS384
+              - HS512
+              - EdDSA
+          headers:
+            type: object
+            description: Optional additional headers
+  responses:
+    200:
+      description: JWS token created successfully
+      schema:
+        type: object
+        properties:
+          jws:
+            type: string
+            description: JWS token
+          algorithm:
+            type: string
+            description: Signature algorithm used
+    400:
+      description: Invalid request
+    401:
+      description: Authentication required
+    404:
+      description: Key not found
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

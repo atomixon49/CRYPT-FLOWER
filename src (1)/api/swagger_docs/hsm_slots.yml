@@ -1,0 +1,64 @@
+List HSM Slots:
+  tags:
+    - HSM
+  summary: List available HSM slots
+  description: |
+    List all available Hardware Security Module (HSM) slots.
+
+    This endpoint returns information about all available HSM slots, including their IDs,
+    descriptions, manufacturers, and token information. This is useful for determining
+    which slot to use for HSM operations.
+  responses:
+    200:
+      description: HSM slots retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              slots:
+                type: array
+                description: Array of HSM slots
+                items:
+                  $ref: '#/components/schemas/HSMSlot'
+          examples:
+            SoftHSM:
+              value:
+                slots:
+                  - id: 0
+                    description: "SoftHSM slot 0"
+                    manufacturer: "SoftHSM"
+                    has_token: true
+                    token_label: "my_token"
+                    token_model: "SoftHSM v2"
+                  - id: 1
+                    description: "SoftHSM slot 1"
+                    manufacturer: "SoftHSM"
+                    has_token: false
+    401:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    501:
+      description: HSM support not available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "HSM support is not available"
+  security:
+    - Bearer: []
+  x-code-samples:
+    - lang: curl
+      source: |
+        curl -X GET "https://example.com/api/v1/hsm/slots" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

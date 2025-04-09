@@ -1,0 +1,46 @@
+Get JWKS:
+  tags:
+    - JWT
+  summary: Get a JWK Set (JWKS) of all public keys
+  description: Get a JSON Web Key Set (JWKS) containing all public keys
+  responses:
+    200:
+      description: JWKS retrieved successfully
+      schema:
+        type: object
+        properties:
+          keys:
+            type: array
+            description: Array of JWKs
+            items:
+              type: object
+              properties:
+                kty:
+                  type: string
+                  description: Key type
+                kid:
+                  type: string
+                  description: Key ID
+                # RSA key properties
+                n:
+                  type: string
+                  description: RSA modulus
+                e:
+                  type: string
+                  description: RSA exponent
+                # EC key properties
+                crv:
+                  type: string
+                  description: EC curve
+                x:
+                  type: string
+                  description: EC x coordinate
+                y:
+                  type: string
+                  description: EC y coordinate
+    401:
+      description: Authentication required
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

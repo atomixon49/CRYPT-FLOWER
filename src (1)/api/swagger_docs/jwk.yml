@@ -1,0 +1,54 @@
+Export JWK:
+  tags:
+    - JWT
+  summary: Export a key as JWK
+  description: Export a cryptographic key as a JSON Web Key (JWK)
+  parameters:
+    - name: key_id
+      in: query
+      required: true
+      type: string
+      description: ID of the key to export
+  responses:
+    200:
+      description: JWK exported successfully
+      schema:
+        type: object
+        properties:
+          kty:
+            type: string
+            description: Key type
+          kid:
+            type: string
+            description: Key ID
+          # RSA key properties
+          n:
+            type: string
+            description: RSA modulus
+          e:
+            type: string
+            description: RSA exponent
+          # EC key properties
+          crv:
+            type: string
+            description: EC curve
+          x:
+            type: string
+            description: EC x coordinate
+          y:
+            type: string
+            description: EC y coordinate
+          # Symmetric key properties
+          k:
+            type: string
+            description: Symmetric key
+    400:
+      description: Invalid request
+    401:
+      description: Authentication required
+    404:
+      description: Key not found
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

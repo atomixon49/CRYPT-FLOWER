@@ -1,0 +1,141 @@
+Generate HSM Key:
+  tags:
+    - HSM
+  summary: Generate a key on the HSM
+  description: |
+    Generate a new cryptographic key on the Hardware Security Module (HSM).
+
+    This endpoint creates a new cryptographic key directly on the HSM, providing
+    hardware-backed security for sensitive cryptographic operations. The key remains
+    protected by the HSM and can be used for encryption, decryption, signing, and
+    verification operations without ever leaving the secure hardware environment.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - key_type
+            - key_size
+            - key_label
+          properties:
+            key_type:
+              type: string
+              description: Type of key to generate
+              enum: [AES, RSA, EC]
+              example: RSA
+            key_size:
+              type: integer
+              description: Size of the key in bits
+              example: 2048
+            key_label:
+              type: string
+              description: Label for the key
+              example: my_hsm_key
+            slot_id:
+              type: integer
+              description: ID of the HSM slot to use (if not provided, the default slot will be used)
+              example: 0
+            extractable:
+              type: boolean
+              description: Whether the key can be extracted from the HSM
+              default: false
+              example: false
+        example:
+          $ref: '#/components/examples/HSMKeyGeneration'
+  responses:
+    201:
+      description: Key generated successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              key_id:
+                type: string
+                description: ID of the generated key
+              key_type:
+                type: string
+                description: Type of the generated key
+              key_label:
+                type: string
+                description: Label of the generated key
+              algorithm:
+                type: string
+                description: Algorithm of the generated key
+              extractable:
+                type: boolean
+                description: Whether the key can be extracted from the HSM
+          example:
+            key_id: "hsm:1234567890abcdef"
+            key_type: "RSA"
+            key_label: "my_hsm_key"
+            algorithm: "RSA"
+            extractable: false
+    400:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            MissingKeyType:
+              value:
+                error: "Missing required parameter: key_type"
+            InvalidKeySize:
+              value:
+                error: "Invalid key size for RSA: 1024. Minimum size is 2048 bits."
+    401:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    501:
+      description: HSM support not available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "HSM support is not available"
+  security:
+    - Bearer: []
+  x-code-samples:
+    - lang: curl
+      source: |
+        curl -X POST "https://example.com/api/v1/hsm/keys" \
+          -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+          -H "Content-Type: application/json" \
+          -d '{
+            "key_type": "RSA",
+            "key_size": 2048,
+            "key_label": "my_hsm_key",
+            "extractable": false
+          }'
+    - lang: python
+      source: |
+        import requests
+        import json
+
+        url = "https://example.com/api/v1/hsm/keys"
+        headers = {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "key_type": "RSA",
+            "key_size": 2048,
+            "key_label": "my_hsm_key",
+            "extractable": False
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        print(response.json())

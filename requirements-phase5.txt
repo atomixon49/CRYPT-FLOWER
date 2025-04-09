@@ -1,0 +1,23 @@
+# Requisitos para la fase 5 del proyecto
+
+# Swagger/OpenAPI
+flasgger>=0.9.5
+apispec>=5.1.1
+
+# PKCS#11 para HSMs
+python-pkcs11>=0.7.0
+
+# Post-quantum criptografía
+liboqs>=0.7.2
+
+# Plugins para sistemas de gestión documental
+# SharePoint
+Office365-REST-Python-Client>=2.3.13
+# WebDAV
+webdavclient3>=3.14.6
+# Alfresco
+requests>=2.28.1
+
+# Utilidades
+cryptography>=38.0.3
+pyjwt>=2.6.0

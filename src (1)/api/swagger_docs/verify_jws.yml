@@ -1,0 +1,65 @@
+Verify JWS:
+  tags:
+    - JWT
+  summary: Verify a JWS token
+  description: Verify a JSON Web Signature (JWS) token
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: object
+        required:
+          - token
+          - key_id
+        properties:
+          token:
+            type: string
+            description: JWS token to verify
+          key_id:
+            type: string
+            description: ID of the key to use for verification
+          algorithms:
+            type: array
+            description: List of allowed algorithms
+            items:
+              type: string
+              enum:
+                - RS256
+                - RS384
+                - RS512
+                - PS256
+                - PS384
+                - PS512
+                - ES256
+                - ES384
+                - ES512
+                - HS256
+                - HS384
+                - HS512
+                - EdDSA
+  responses:
+    200:
+      description: JWS token verification result
+      schema:
+        type: object
+        properties:
+          valid:
+            type: boolean
+            description: Whether the signature is valid
+          payload:
+            type: object
+            description: The payload
+          headers:
+            type: object
+            description: The headers
+    400:
+      description: Invalid request
+    401:
+      description: Authentication required
+    404:
+      description: Key not found
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

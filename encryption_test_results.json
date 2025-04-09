@@ -1,0 +1,17 @@
+{
+  "key_generation": {
+    "aes_256": "Success",
+    "rsa_2048": "Success",
+    "kyber_768": "Not available"
+  },
+  "encryption": {
+    "aes_gcm": "Success",
+    "chacha20_poly1305": "Success",
+    "file": "Success"
+  },
+  "decryption": {
+    "aes_gcm": "Success",
+    "chacha20_poly1305": "Success",
+    "file": "Success"
+  }
+}

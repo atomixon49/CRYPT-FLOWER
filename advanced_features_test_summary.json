@@ -1,0 +1,37 @@
+{
+  "timestamp": 1744164620.219379,
+  "timestamp_str": "2025-04-08 21:10:20 Hora est. Pac\u00edfico, Sudam\u00e9rica",
+  "all_success": false,
+  "results": [
+    {
+      "name": "Hybrid Cryptography",
+      "success": false,
+      "return_code": 1,
+      "results": {}
+    },
+    {
+      "name": "Multi-Recipient Encryption",
+      "success": false,
+      "return_code": 1,
+      "results": {}
+    },
+    {
+      "name": "Co-Signatures",
+      "success": false,
+      "return_code": 1,
+      "results": {}
+    },
+    {
+      "name": "Timestamps",
+      "success": true,
+      "return_code": 0,
+      "results": {}
+    },
+    {
+      "name": "Certificate Revocation",
+      "success": true,
+      "return_code": 0,
+      "results": {}
+    }
+  ]
+}

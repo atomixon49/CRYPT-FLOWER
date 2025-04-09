@@ -1,0 +1,76 @@
+Create JWE:
+  tags:
+    - JWT
+  summary: Create a JWE token
+  description: Create a JSON Web Encryption (JWE) token
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: object
+        required:
+          - payload
+          - key_id
+        properties:
+          payload:
+            type: object
+            description: Data to encrypt
+          key_id:
+            type: string
+            description: ID of the key to use for encryption
+          algorithm:
+            type: string
+            description: Key encryption algorithm to use
+            default: RSA-OAEP
+            enum:
+              - RSA-OAEP
+              - RSA-OAEP-256
+              - RSA1_5
+              - ECDH-ES
+              - ECDH-ES+A128KW
+              - ECDH-ES+A192KW
+              - ECDH-ES+A256KW
+              - A128KW
+              - A192KW
+              - A256KW
+              - dir
+          encryption:
+            type: string
+            description: Content encryption algorithm to use
+            default: A256GCM
+            enum:
+              - A128GCM
+              - A192GCM
+              - A256GCM
+              - A128CBC-HS256
+              - A192CBC-HS384
+              - A256CBC-HS512
+          headers:
+            type: object
+            description: Optional additional headers
+  responses:
+    200:
+      description: JWE token created successfully
+      schema:
+        type: object
+        properties:
+          jwe:
+            type: string
+            description: JWE token
+          algorithm:
+            type: string
+            description: Key encryption algorithm used
+          encryption:
+            type: string
+            description: Content encryption algorithm used
+    400:
+      description: Invalid request
+    401:
+      description: Authentication required
+    404:
+      description: Key not found
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

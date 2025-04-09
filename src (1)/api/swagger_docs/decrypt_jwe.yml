@@ -1,0 +1,43 @@
+Decrypt JWE:
+  tags:
+    - JWT
+  summary: Decrypt a JWE token
+  description: Decrypt a JSON Web Encryption (JWE) token
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: object
+        required:
+          - token
+          - key_id
+        properties:
+          token:
+            type: string
+            description: JWE token to decrypt
+          key_id:
+            type: string
+            description: ID of the key to use for decryption
+  responses:
+    200:
+      description: JWE token decryption result
+      schema:
+        type: object
+        properties:
+          payload:
+            type: object
+            description: The decrypted payload
+          headers:
+            type: object
+            description: The headers
+    400:
+      description: Invalid request
+    401:
+      description: Authentication required
+    404:
+      description: Key not found
+    500:
+      description: Internal server error
+  security:
+    - Bearer: []

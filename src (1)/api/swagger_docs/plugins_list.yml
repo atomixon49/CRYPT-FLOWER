@@ -1,0 +1,57 @@
+List Plugins:
+  tags:
+    - Plugins
+  summary: List available document management system plugins
+  description: List all available plugins for document management systems
+  responses:
+    200:
+      description: Plugins retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              plugins:
+                type: array
+                description: Array of available plugins
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Plugin ID
+                    name:
+                      type: string
+                      description: Plugin name
+                    description:
+                      type: string
+                      description: Plugin description
+                    version:
+                      type: string
+                      description: Plugin version
+                    system_type:
+                      type: string
+                      description: Type of document management system
+                    capabilities:
+                      type: array
+                      description: Plugin capabilities
+                      items:
+                        type: string
+                        enum: [read, write, encrypt, decrypt, sign, verify]
+                    configured:
+                      type: boolean
+                      description: Whether the plugin is configured
+    401:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  security:
+    - Bearer: []

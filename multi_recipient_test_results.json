@@ -1,0 +1,19 @@
+{
+  "key_generation": {
+    "recipient_keys": "Success"
+  },
+  "encryption": {
+    "multi_recipient": "Success"
+  },
+  "decryption": {
+    "recipient1": "Success",
+    "recipient2": "Success",
+    "recipient3": "Success: Correctly denied access",
+    "recipient3_after_add": "Success",
+    "recipient2_after_remove": "Success: Correctly denied access"
+  },
+  "recipient_management": {
+    "add_recipient": "Success",
+    "remove_recipient": "Success"
+  }
+}
