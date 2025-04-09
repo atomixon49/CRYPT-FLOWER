@@ -128,3 +128,13 @@ test_*.json
 temp/
 tmp/
 *.tmp
+
+# Archivos de requisitos por fases (obsoletos)
+requirements-phase*.txt
+
+# Archivos README por fases (obsoletos)
+README-phase*.md
+
+# Carpetas duplicadas (obsoletas)
+src/
+src (1)/

@@ -15,8 +15,8 @@ Un sistema criptográfico completo y robusto que aborda los problemas de los sis
 - ✅ Cifrado multi-destinatario (cifrado para múltiples receptores)
 - ✅ Co-firmas (cadenas de firmas con múltiples firmantes)
 - ✅ Sellado de tiempo (timestamping)
-- ⏳ Verificación de revocación de certificados (CRL, OCSP)
-- ⏳ Soporte completo para criptografía post-cuántica
+- ✅ Verificación de revocación de certificados (CRL, OCSP)
+- ✅ Soporte completo para criptografía post-cuántica
 
 ## Ventajas
 
@@ -75,24 +75,29 @@ python -m src.main --gui
 
 ```
 src/
+├── api/                   # API REST y endpoints
 ├── core/                  # Funcionalidad criptográfica principal
-│   ├── encryption.py      # Motor de cifrado
-│   ├── signatures.py      # Motor de firmas
-│   ├── key_management.py  # Gestión de claves
-│   ├── hybrid_crypto.py   # Criptografía híbrida
-│   └── ...
+│   ├── encryption/        # Algoritmos de encriptación
+│   ├── signatures/        # Algoritmos de firma digital
+│   ├── key_management/    # Gestión de claves
+│   ├── post_quantum/      # Criptografía post-cuántica
+│   ├── hsm/               # Soporte para HSM/TPM
+│   ├── audit/             # Auditoría y logging
+│   └── benchmark/         # Benchmarking y rendimiento
 ├── file_handlers/         # Manejadores de archivos
+├── plugins/               # Plugins para sistemas externos
 ├── ui/                    # Interfaces de usuario
 │   ├── cli/               # Interfaz de línea de comandos
 │   └── gui/               # Interfaz gráfica
-└── utils/                 # Utilidades
+└── utils/                 # Utilidades generales
 
 tests/                     # Pruebas
-├── test_encryption.py
-├── test_signatures.py
-└── ...
+├── unit/                  # Pruebas unitarias
+├── integration/           # Pruebas de integración
+└── security/              # Pruebas de seguridad
 
 docs/                      # Documentación
+scripts/                   # Scripts de utilidad
 ```
 
 ## Pruebas
@@ -134,6 +139,23 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 ## Estado del Proyecto
 
 Este proyecto se encuentra en fase beta. La mayoría de las características están implementadas y probadas, pero algunas funcionalidades avanzadas están aún en desarrollo.
+
+## Próximos Pasos
+
+Aunque el proyecto está completo, siempre hay oportunidades para mejoras futuras:
+
+### Mejoras de Rendimiento:
+- Optimización para operaciones con archivos grandes
+- Paralelización de operaciones criptográficas
+
+### Características Adicionales:
+- Soporte para más algoritmos post-cuánticos
+- Integración con servicios de almacenamiento en la nube
+- Soporte para hardware criptográfico (HSM, TPM)
+
+### Mejoras de Usabilidad:
+- Asistentes paso a paso para operaciones complejas
+- Más retroalimentación visual durante operaciones largas
 
 ## Contacto
 
