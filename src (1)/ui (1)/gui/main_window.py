@@ -18,6 +18,7 @@ from ...core.signatures import SignatureEngine
 from ...core.key_rotation import KeyRotationManager
 from ...core.crypto_audit import CryptoAuditLogger, FileAuditLogDestination
 from ...core.crypto_benchmark import CryptoBenchmark
+from ...core.cert_revocation import CertificateRevocationChecker
 from ...file_handlers.text_handler import TextFileHandler
 from ...file_handlers.pdf_handler import PDFHandler
 from ...file_handlers.pdf_section_handler import PDFSectionHandler
@@ -31,6 +32,7 @@ from .tabs.key_rotation_tab import KeyRotationTab
 from .tabs.audit_tab import AuditTab
 from .tabs.benchmark_tab import BenchmarkTab
 from .tabs.jwt_tab import JWTTab
+from .tabs.cert_revocation_tab import CertRevocationTab
 
 class MainWindow(QMainWindow):
     """Main window for the cryptographic system GUI."""
@@ -44,6 +46,10 @@ class MainWindow(QMainWindow):
         self.encryption_engine = EncryptionEngine()
         self.signature_engine = SignatureEngine()
         self.rotation_manager = KeyRotationManager(self.key_manager)
+
+        # Initialize certificate revocation checker
+        cache_dir = os.path.join(os.path.expanduser("~"), ".secure_crypto", "crl_cache")
+        self.revocation_checker = CertificateRevocationChecker(cache_dir=cache_dir)
 
         # Initialize audit and benchmark components
         self.audit_logger = CryptoAuditLogger()
@@ -208,6 +214,16 @@ class MainWindow(QMainWindow):
             self.tab_widget.addTab(self.jwt_tab, "JWT/JWS/JWE")
         except Exception as e:
             print(f"Failed to initialize JWT tab: {str(e)}")
+
+        # Certificate Revocation tab
+        try:
+            self.cert_revocation_tab = CertRevocationTab(
+                self.key_manager,
+                self.revocation_checker
+            )
+            self.tab_widget.addTab(self.cert_revocation_tab, "Certificate Revocation")
+        except Exception as e:
+            print(f"Failed to initialize Certificate Revocation tab: {str(e)}")
 
     def open_file(self):
         """Open a file or directory."""
